@@ -19,8 +19,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
   /* ──────────────────────────────────────────
      CONTROLLERS / STATE
   ────────────────────────────────────────── */
-  final List<TextEditingController> _controllers =
-      List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
 
   String? _error;
   String? _resendMessage;
@@ -59,10 +58,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
 
     if (resp.statusCode == 200) {
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => LoginScreen()),
-      );
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
     } else {
       setState(() {
         _resendMessage = null;
@@ -134,21 +130,22 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: lines
-            .map(
-              (l) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(ico, color: col, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(l, style: TextStyle(color: col))),
-                  ],
-                ),
-              ),
-            )
-            .toList(),
+        children:
+            lines
+                .map(
+                  (l) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(ico, color: col, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(l, style: TextStyle(color: col))),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
       ),
     );
   }
@@ -164,14 +161,12 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
               maxLength: 1,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
-              style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 counterText: '',
                 filled: true,
                 fillColor: Colors.white,
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onChanged: (v) => _handleInput(v, i),
             ),
@@ -189,29 +184,21 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFFEFF8EC),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.green[800],
-      ),
+      backgroundColor: Colors.white,
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, foregroundColor: Color(0xFFA69DF5)),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(24, 32, 24, bottomInset + 16),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight - (bottomInset + 16)),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - (bottomInset + 16)),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.mark_email_read_outlined,
-                        size: 64, color: Colors.green),
+                    const Icon(Icons.mark_email_read_outlined, size: 64, color: Color(0xFFA69DF5)),
                     const SizedBox(height: 16),
-                    const Text("Potwierdź adres e-mail",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w600)),
+                    const Text("Potwierdź adres e-mail", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 12),
                     Text(
                       "Wpisz kod wysłany na adres: ${widget.email}",
@@ -224,30 +211,23 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                     ElevatedButton(
                       onPressed: code.length == 6 ? confirmEmail : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[600],
+                        backgroundColor: Color(0xFFA69DF5),
                         minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
-                      child: const Text("Potwierdź",
-                          style: TextStyle(color: Colors.white)),
+                      child: const Text("Potwierdź", style: TextStyle(color: Colors.white)),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
                       onPressed: _secondsLeft > 0 ? null : resendCode,
                       child: Text(
-                        _secondsLeft > 0
-                            ? "Wyślij ponownie za $_secondsLeft s"
-                            : "Wyślij kod ponownie",
-                        style: TextStyle(color: Colors.green[700]),
+                        _secondsLeft > 0 ? "Wyślij ponownie za $_secondsLeft s" : "Wyślij kod ponownie",
+                        style: TextStyle(color: Color(0xFFA69DF5)),
                       ),
                     ),
                     if (_resendMessage != null)
-                      _buildMessageBox(_resendMessage!, Colors.green,
-                          Icons.check_circle_outline),
-                    if (_error != null)
-                      _buildMessageBox(_error!, Colors.red,
-                          Icons.warning_amber_rounded),
+                      _buildMessageBox(_resendMessage!, Color(0xFFA69DF5), Icons.check_circle_outline),
+                    if (_error != null) _buildMessageBox(_error!, Colors.red, Icons.warning_amber_rounded),
                   ],
                 ),
               ),

@@ -69,17 +69,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         case 200:
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  ConfirmEmailScreen(email: emailController.text.trim()),
-            ),
+            MaterialPageRoute(builder: (_) => ConfirmEmailScreen(email: emailController.text.trim())),
           );
           break;
 
         case 409: // e-mail już istnieje
-          setState(() => errorMessage = res.data is String
-              ? res.data
-              : jsonEncode(res.data));
+          setState(() => errorMessage = res.data is String ? res.data : jsonEncode(res.data));
           break;
 
         default:
@@ -122,8 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       onChanged: (_) => setState(() {}),
       decoration: InputDecoration(
         hintText: hint,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -131,15 +125,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           borderSide: const BorderSide(color: Colors.grey),
           borderRadius: BorderRadius.circular(12),
         ),
-        suffixIcon: onToggleVisibility != null
-            ? IconButton(
-                icon: Icon(
-                  isTextVisible! ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey,
-                ),
-                onPressed: onToggleVisibility,
-              )
-            : null,
+        suffixIcon:
+            onToggleVisibility != null
+                ? IconButton(
+                  icon: Icon(isTextVisible! ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                  onPressed: onToggleVisibility,
+                )
+                : null,
       ),
     );
   }
@@ -156,25 +148,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: lines
-            .map(
-              (msg) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.warning_amber_rounded,
-                        color: Colors.red, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(msg,
-                          style: TextStyle(color: Colors.red.shade700)),
+        children:
+            lines
+                .map(
+                  (msg) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(msg, style: TextStyle(color: Colors.red.shade700))),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            )
-            .toList(),
+                  ),
+                )
+                .toList(),
       ),
     );
   }
@@ -185,15 +174,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF8EC),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.green[800],
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        foregroundColor: const Color(0xFFA69DF5),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -202,11 +188,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             Text(
               "Załóż konto",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.green[800],
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFFA69DF5)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -214,8 +196,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 12),
             _buildTextField(lastNameController, "Nazwisko"),
             const SizedBox(height: 12),
-            _buildTextField(emailController, "E-mail",
-                type: TextInputType.emailAddress),
+            _buildTextField(emailController, "E-mail", type: TextInputType.emailAddress),
             const SizedBox(height: 12),
             _buildTextField(
               passwordController,
@@ -223,8 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               type: TextInputType.visiblePassword,
               isObscure: !_showPassword,
               isTextVisible: _showPassword,
-              onToggleVisibility: () =>
-                  setState(() => _showPassword = !_showPassword),
+              onToggleVisibility: () => setState(() => _showPassword = !_showPassword),
             ),
             const SizedBox(height: 12),
             _buildTextField(
@@ -233,31 +213,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
               type: TextInputType.visiblePassword,
               isObscure: !_showConfirmPassword,
               isTextVisible: _showConfirmPassword,
-              onToggleVisibility: () => setState(
-                  () => _showConfirmPassword = !_showConfirmPassword),
+              onToggleVisibility: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: !isFormValid || isLoading ? null : register,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[600],
+                backgroundColor: const Color(0xFFA69DF5),
                 minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               ),
-              child: isLoading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text("Zarejestruj się",
-                      style: TextStyle(color: Colors.white)),
+              child:
+                  isLoading
+                      ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                      : const Text("Zarejestruj się", style: TextStyle(color: Colors.white)),
             ),
-            if (errorMessage != null) _buildErrorBox(errorMessage!)
+            if (errorMessage != null) _buildErrorBox(errorMessage!),
           ],
         ),
       ),

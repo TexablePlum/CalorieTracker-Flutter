@@ -10,7 +10,7 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       // Ustawienie koloru tła
-      backgroundColor: const Color(0xFFE8F5E9), // jasna zieleń
+      backgroundColor: Colors.white, // jasna zieleń
       body: Padding(
         // Zewnętrzne odstępy po bokach
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -22,11 +22,7 @@ class WelcomeScreen extends StatelessWidget {
             // Nagłówek z nazwą aplikacji
             const Text(
               "CalorieTracker",
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.black87),
             ),
             const SizedBox(height: 80),
 
@@ -36,18 +32,13 @@ class WelcomeScreen extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   // Nawigator przesuwa na stos nowy ekran rejestracji
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => RegisterScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen()));
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[600],
+                  backgroundColor: const Color(0xFFA69DF5),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
                 ),
                 child: const Text("Zarejestruj się", style: TextStyle(fontSize: 16)),
               ),
@@ -61,18 +52,13 @@ class WelcomeScreen extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   // Nawigator przesuwa na stos ekran logowania
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => LoginScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
                 },
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.green[600]!),
-                  foregroundColor: Colors.green[800],
+                  side: BorderSide(color: const Color(0xFFA69DF5)),
+                  foregroundColor: const Color(0xFFA69DF5),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
                 ),
                 child: const Text("Zaloguj się", style: TextStyle(fontSize: 16)),
               ),

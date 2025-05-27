@@ -1,10 +1,12 @@
 import 'package:calorie_tracker_flutter_front/auth/token_storage.dart';
+import 'package:calorie_tracker_flutter_front/nav_screens/homepage.dart';
+import 'package:calorie_tracker_flutter_front/nav_screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 
 import 'confirm_email_screen.dart';
-import 'home_screen.dart';
+import 'mainProfile.dart';
 import 'profile_setup_screen.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
@@ -23,9 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? errorMessage;
   bool _showPassword = false;
 
-  bool get isFormValid =>
-      emailController.text.trim().isNotEmpty &&
-      passwordController.text.isNotEmpty;
+  bool get isFormValid => emailController.text.trim().isNotEmpty && passwordController.text.isNotEmpty;
 
   /* ──────────────────────────────────────────────
      LOGIN
@@ -42,30 +42,21 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final res = await dio.post(
         '/api/auth/login',
-        data: {
-          "email": emailController.text.trim(),
-          "password": passwordController.text,
-        },
+        data: {"email": emailController.text.trim(), "password": passwordController.text},
         options: Options(validateStatus: (_) => true),
       );
 
       switch (res.statusCode) {
         case 200:
           // zapisz tokeny
-          await storage.save(
-            res.data['accessToken'],
-            res.data['refreshToken'],
-          );
+          await storage.save(res.data['accessToken'], res.data['refreshToken']);
           await checkProfileAndRedirect();
           break;
 
         case 403: // e-mail niepotwierdzony
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  ConfirmEmailScreen(email: emailController.text.trim()),
-            ),
+            MaterialPageRoute(builder: (_) => ConfirmEmailScreen(email: emailController.text.trim())),
           );
           break;
 
@@ -89,34 +80,25 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> checkProfileAndRedirect() async {
     final dio = context.read<Dio>();
 
-    final res = await dio.get(
-      '/api/profile',
-      options: Options(validateStatus: (_) => true),
-    );
+    final res = await dio.get('/api/profile', options: Options(validateStatus: (_) => true));
 
     if (!mounted) return;
 
     if (res.statusCode == 204) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => ProfileSetupScreen()),
-        (_) => false,
-      );
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => ProfileSetupScreen()), (_) => false);
     } else if (res.statusCode == 200) {
       final data = res.data;
       final isComplete = data is Map && data["isComplete"] == true;
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-          builder: (_) => isComplete ? HomeScreen() : ProfileSetupScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => isComplete ? MainScreen() : ProfileSetupScreen()),
         (_) => false,
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Nie udało się pobrać profilu użytkownika.")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Nie udało się pobrać profilu użytkownika.")));
     }
   }
 
@@ -151,29 +133,24 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: controller,
       onChanged: (_) => setState(() {}),
       obscureText: isPassword && !visible,
-      keyboardType: isPassword
-          ? TextInputType.visiblePassword
-          : TextInputType.emailAddress,
+      keyboardType: isPassword ? TextInputType.visiblePassword : TextInputType.emailAddress,
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.grey),
           borderRadius: BorderRadius.circular(12),
         ),
-        suffixIcon: isPassword
-            ? IconButton(
-                icon: Icon(
-                  visible ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey,
-                ),
-                onPressed: onToggle,
-              )
-            : null,
+        suffixIcon:
+            isPassword
+                ? IconButton(
+                  icon: Icon(visible ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                  onPressed: onToggle,
+                )
+                : null,
       ),
     );
   }
@@ -190,24 +167,22 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: lines
-            .map(
-              (msg) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.warning_amber_rounded,
-                        color: Colors.red, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                        child: Text(msg,
-                            style: TextStyle(color: Colors.red.shade700))),
-                  ],
-                ),
-              ),
-            )
-            .toList(),
+        children:
+            lines
+                .map(
+                  (msg) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(msg, style: TextStyle(color: Colors.red.shade700))),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
       ),
     );
   }
@@ -218,11 +193,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF8EC),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.green[800],
+        foregroundColor: const Color(0xFFA69DF5),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -241,11 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Text(
               "Logowanie",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.green[800],
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFFA69DF5)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -263,43 +234,34 @@ class _LoginScreenState extends State<LoginScreen> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => ForgotPasswordScreen()));
                 },
-                child: const Text("Zapomniałeś hasła?",
-                    style: TextStyle(color: Colors.grey)),
+                child: const Text("Zapomniałeś hasła?", style: TextStyle(color: Colors.grey)),
               ),
             ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: !isFormValid || isLoading ? null : login,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[600],
+                backgroundColor: const Color(0xFFA69DF5),
                 minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               ),
-              child: isLoading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Text("Zaloguj się",
-                      style: TextStyle(color: Colors.white)),
+              child:
+                  isLoading
+                      ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                      : const Text("Zaloguj się", style: TextStyle(color: Colors.white)),
             ),
             if (errorMessage != null) _buildErrorBox(errorMessage!),
             const SizedBox(height: 16),
             Center(
               child: TextButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => RegisterScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen()));
                 },
                 child: const Text("Nie masz konta? Zarejestruj się"),
               ),

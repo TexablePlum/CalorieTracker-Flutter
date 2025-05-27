@@ -1,3 +1,4 @@
+import 'package:calorie_tracker_flutter_front/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
@@ -24,21 +25,14 @@ void main() async {
   );
 
   dio.interceptors.addAll([
-    AuthInterceptor(dio, storage),          // automatyczny refresh tokenów
-
+    AuthInterceptor(dio, storage), // automatyczny refresh tokenów
     // TODO: usuń w release
-    LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-    ),                                      
+    LogInterceptor(requestBody: true, responseBody: true),
   ]);
 
   runApp(
     MultiProvider(
-      providers: [
-        Provider<TokenStorage>.value(value: storage),
-        Provider<Dio>.value(value: dio),
-      ],
+      providers: [Provider<TokenStorage>.value(value: storage), Provider<Dio>.value(value: dio)],
       child: const CalorieTrackerApp(),
     ),
   );
@@ -54,7 +48,7 @@ class CalorieTrackerApp extends StatelessWidget {
       title: 'CalorieTracker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.green),
-      home: SplashScreen(),           // pierwszy ekran
+      home: WelcomeScreen(), // pierwszy ekran
     );
   }
 }

@@ -39,6 +39,7 @@ dependencies:
   synchronized: ^3.1.0                # mutex zapobiega 5 równoległym refresh-om
   provider: ^6.1.2                    # wygodne wstrzykiwanie klienta w całej apce
   dio: ^5.4.2                         # do komunikacji z backendem
+  table_calendar: ^3.2.0
 
 dev_dependencies:
   flutter_test:

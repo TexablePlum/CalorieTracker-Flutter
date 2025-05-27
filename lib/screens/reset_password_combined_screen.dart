@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 
-
 import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -20,8 +19,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   /* ──────────────────────────────────────────────
      CONTROLLERS / STATE
   ────────────────────────────────────────────── */
-  final List<TextEditingController> _codeControllers =
-      List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _codeControllers = List.generate(6, (_) => TextEditingController());
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -35,9 +33,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   String get code => _codeControllers.map((c) => c.text).join();
   bool get isFormValid =>
-      code.length == 6 &&
-      _newPasswordController.text.isNotEmpty &&
-      _confirmPasswordController.text.isNotEmpty;
+      code.length == 6 && _newPasswordController.text.isNotEmpty && _confirmPasswordController.text.isNotEmpty;
 
   /* ──────────────────────────────────────────────
      INIT / DISPOSE
@@ -120,11 +116,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     final res = await dio.post(
       '/api/auth/reset-password',
-      data: {
-        "email": widget.email,
-        "code": code,
-        "newPassword": _newPasswordController.text,
-      },
+      data: {"email": widget.email, "code": code, "newPassword": _newPasswordController.text},
       options: Options(validateStatus: (_) => true),
     );
 
@@ -132,11 +124,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       await storage.clear();
 
       if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => LoginScreen()),
-        (_) => false,
-      );
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => LoginScreen()), (_) => false);
     } else {
       setState(() => _errorMessage = _parseError(res.data));
     }
@@ -150,10 +138,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       if (body is List) {
         return body.join('\n');
       } else if (body is Map && body['errors'] != null) {
-        return (body['errors'] as Map<String, dynamic>)
-            .values
-            .expand((v) => v)
-            .join('\n');
+        return (body['errors'] as Map<String, dynamic>).values.expand((v) => v).join('\n');
       } else if (body is String) {
         return body;
       }
@@ -184,14 +169,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               maxLength: 1,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
-              style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 counterText: '',
                 filled: true,
                 fillColor: Colors.white,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onChanged: (v) => _handleCodeInput(v, i),
             ),
@@ -216,19 +199,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: lines.map((line) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(icon, color: color, size: 18),
-                const SizedBox(width: 8),
-                Expanded(child: Text(line, style: TextStyle(color: color))),
-              ],
-            ),
-          );
-        }).toList(),
+        children:
+            lines.map((line) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(icon, color: color, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(line, style: TextStyle(color: color))),
+                  ],
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -243,39 +227,28 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFFEFF8EC),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.green[800],
-      ),
+      backgroundColor: Colors.white,
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, foregroundColor: Color(0xFFA69DF5)),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              physics: isKeyboardOpen
-                  ? const ClampingScrollPhysics()
-                  : const NeverScrollableScrollPhysics(),
+              physics: isKeyboardOpen ? const ClampingScrollPhysics() : const NeverScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 32),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - bottomInset,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - bottomInset),
                 child: Column(
-                  mainAxisAlignment: isKeyboardOpen
-                      ? MainAxisAlignment.start
-                      : MainAxisAlignment.center,
+                  mainAxisAlignment: isKeyboardOpen ? MainAxisAlignment.start : MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.lock_reset,
-                        size: 64, color: Colors.green),
+                    const Icon(Icons.lock_reset, size: 64, color: Color(0xFFA69DF5)),
                     const SizedBox(height: 16),
-                    const Text("Zresetuj hasło",
-                        style:
-                            TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                    const Text("Zresetuj hasło", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 12),
-                    Text("Wpisz kod wysłany na:\n${widget.email}",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[700])),
+                    Text(
+                      "Wpisz kod wysłany na:\n${widget.email}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
                     const SizedBox(height: 24),
                     _buildCodeFields(),
                     const SizedBox(height: 24),
@@ -286,17 +259,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         hintText: "Nowe hasło",
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            _showPassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () =>
-                              setState(() => _showPassword = !_showPassword),
+                          icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                          onPressed: () => setState(() => _showPassword = !_showPassword),
                         ),
                       ),
                     ),
@@ -308,17 +274,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         hintText: "Potwierdź hasło",
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _showConfirmPassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
+                            _showConfirmPassword ? Icons.visibility_off : Icons.visibility,
                             color: Colors.grey,
                           ),
-                          onPressed: () => setState(() =>
-                              _showConfirmPassword = !_showConfirmPassword),
+                          onPressed: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
                         ),
                       ),
                     ),
@@ -326,30 +288,24 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     ElevatedButton(
                       onPressed: isFormValid ? _submit : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[600],
+                        backgroundColor: Color(0xFFA69DF5),
                         minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
-                      child: const Text("Zmień hasło",
-                          style: TextStyle(color: Colors.white)),
+                      child: const Text("Zmień hasło", style: TextStyle(color: Colors.white)),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
                       onPressed: _secondsLeft > 0 ? null : _resendCode,
                       child: Text(
-                        _secondsLeft > 0
-                            ? "Wyślij ponownie za $_secondsLeft s"
-                            : "Wyślij kod ponownie",
-                        style: TextStyle(color: Colors.green[700]),
+                        _secondsLeft > 0 ? "Wyślij ponownie za $_secondsLeft s" : "Wyślij kod ponownie",
+                        style: TextStyle(color: Color(0xFFA69DF5)),
                       ),
                     ),
                     if (_infoMessage != null)
-                      _buildMessageBox(_infoMessage!, Colors.green,
-                          Icons.check_circle_outline),
+                      _buildMessageBox(_infoMessage!, Color(0xFFA69DF5), Icons.check_circle_outline),
                     if (_errorMessage != null)
-                      _buildMessageBox(_errorMessage!, Colors.red,
-                          Icons.warning_amber_rounded),
+                      _buildMessageBox(_errorMessage!, Colors.red, Icons.warning_amber_rounded),
                   ],
                 ),
               ),

@@ -69,10 +69,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         // żeby back-arrow w ResetPassword wracał właśnie tutaj
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) =>
-                ResetPasswordScreen(email: emailController.text.trim()),
-          ),
+          MaterialPageRoute(builder: (_) => ResetPasswordScreen(email: emailController.text.trim())),
         );
       } else {
         try {
@@ -106,11 +103,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          icon,
-          const SizedBox(width: 8),
-          Expanded(child: Text(text, style: TextStyle(color: color))),
-        ],
+        children: [icon, const SizedBox(width: 8), Expanded(child: Text(text, style: TextStyle(color: color)))],
       ),
     );
   }
@@ -123,8 +116,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         hintText: "E-mail",
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.grey),
@@ -140,67 +132,55 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF8EC),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.green.shade800,
+        foregroundColor: const Color(0xFFA69DF5),
         leading: const BackButton(),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Icon(Icons.lock_outline, size: 64, color: Colors.green),
+            const Icon(Icons.lock_outline, size: 64, color: const Color(0xFFA69DF5)),
             const SizedBox(height: 16),
             Text(
               "Zapomniałeś hasła?",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.green.shade800,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFFA69DF5)),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "Podaj adres e-mail powiązany z kontem.",
-              textAlign: TextAlign.center,
-            ),
+            const Text("Podaj adres e-mail powiązany z kontem.", textAlign: TextAlign.center),
             const SizedBox(height: 24),
             _buildTextField(),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: !isFormValid || isLoading ? null : submit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade600,
+                backgroundColor: const Color(0xFFA69DF5),
                 minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               ),
-              child: isLoading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Text("Wyślij kod",
-                      style: TextStyle(color: Colors.white)),
+              child:
+                  isLoading
+                      ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                      : const Text("Wyślij kod", style: TextStyle(color: Colors.white)),
             ),
             if (errorMessage != null)
               _buildMessageBox(
                 errorMessage!,
                 Colors.red,
-                const Icon(Icons.warning_amber_rounded,
-                    color: Colors.red, size: 18),
+                const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 18),
               ),
             if (successMessage != null)
               _buildMessageBox(
                 successMessage!,
-                Colors.green,
-                const Icon(Icons.check_circle_outline,
-                    color: Colors.green, size: 18),
+                const Color(0xFFA69DF5),
+                const Icon(Icons.check_circle_outline, color: const Color(0xFFA69DF5), size: 18),
               ),
           ],
         ),

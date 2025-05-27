@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 
 import 'welcome_screen.dart';
-import 'home_screen.dart';
+import 'mainProfile.dart';
 import 'profile_setup_screen.dart';
 import 'login_screen.dart';
 
@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
   ────────────────────────────────────────── */
   Future<void> _checkAuth() async {
     final storage = context.read<TokenStorage>();
-    final dio     = context.read<Dio>();
+    final dio = context.read<Dio>();
 
     // krótkie „pauza-logo” żeby spinner mignął, można pominąć
     await Future.delayed(const Duration(milliseconds: 300));
@@ -42,18 +42,14 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     // access istnieje → pytamy backend o profil
-    final resp = await dio.get(
-      '/api/profile',
-      options: Options(validateStatus: (_) => true),
-    );
+    final resp = await dio.get('/api/profile', options: Options(validateStatus: (_) => true));
 
     if (!mounted) return;
 
     switch (resp.statusCode) {
       case 200:
-        final complete =
-            resp.data is Map && resp.data['isComplete'] == true;
-        _go(complete ? HomeScreen() : ProfileSetupScreen());
+        final complete = resp.data is Map && resp.data['isComplete'] == true;
+        _go(complete ? mainProfile() : ProfileSetupScreen());
         break;
 
       case 204: // brak profilu
@@ -69,10 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _go(Widget page) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => page),
-      (_) => false,
-    );
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => page), (_) => false);
   }
 
   /* ──────────────────────────────────────────
@@ -80,8 +73,6 @@ class _SplashScreenState extends State<SplashScreen> {
   ────────────────────────────────────────── */
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
