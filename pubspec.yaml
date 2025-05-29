@@ -40,6 +40,8 @@ dependencies:
   provider: ^6.1.2                    # wygodne wstrzykiwanie klienta w całej apce
   dio: ^5.4.2                         # do komunikacji z backendem
   table_calendar: ^3.2.0
+  percent_indicator: ^4.2.2
+  mobile_scanner: ^3.5.4
 
 dev_dependencies:
   flutter_test:
