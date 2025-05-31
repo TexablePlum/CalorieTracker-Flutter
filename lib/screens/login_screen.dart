@@ -1,12 +1,10 @@
 import 'package:calorie_tracker_flutter_front/auth/token_storage.dart';
-import 'package:calorie_tracker_flutter_front/nav_screens/homepage.dart';
-import 'package:calorie_tracker_flutter_front/nav_screens/main_screen.dart';
+import 'package:calorie_tracker_flutter_front/nav_pages/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 
 import 'confirm_email_screen.dart';
-import 'mainProfile.dart';
 import 'profile_setup_screen.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
@@ -92,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => isComplete ? MainScreen() : ProfileSetupScreen()),
+        MaterialPageRoute(builder: (_) => isComplete ? MainPage() : ProfileSetupScreen()),
         (_) => false,
       );
     } else {

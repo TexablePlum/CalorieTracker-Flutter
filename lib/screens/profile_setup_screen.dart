@@ -1,9 +1,8 @@
+import 'package:calorie_tracker_flutter_front/nav_pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
-
-import 'mainProfile.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   @override
@@ -132,7 +131,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     if (!mounted) return;
 
     if (res.statusCode == 204) {
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => mainProfile()), (_) => false);
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => ProfilePage()), (_) => false);
     } else {
       setState(() => errorMessage = _extractErrors(res.data, res.statusCode));
     }
