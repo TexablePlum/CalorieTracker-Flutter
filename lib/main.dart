@@ -40,7 +40,7 @@ void main() async {
   );
 
   dio.interceptors.addAll([
-    // Auth interceptor musi być pierwszy
+    // Auth interceptor
     AuthInterceptor(dio, storage),
     
     // Obsługa błędów

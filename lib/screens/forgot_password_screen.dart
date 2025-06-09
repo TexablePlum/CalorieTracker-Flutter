@@ -65,8 +65,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       isLoading = false;
 
       if (res.statusCode == 200) {
-        // Zostawia ekran ForgotPassword w historii,
-        // żeby back-arrow w ResetPassword wracał właśnie tutaj
+        // Zostawia ekran ForgotPassword w historii żeby back-arrow w ResetPassword wracał właśnie tutaj
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => ResetPasswordScreen(email: emailController.text.trim())),

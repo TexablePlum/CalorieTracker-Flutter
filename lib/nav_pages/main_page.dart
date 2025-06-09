@@ -71,7 +71,7 @@ class MainPageState extends State<MainPage> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
         ],
       ),
-      body: _pages[_pageIndex], // Używa bezpośredniego dostępu (zamiast IndexedStack)
+      body: _pages[_pageIndex], // Używa bezpośredniego dostępu
     );
   }
 }

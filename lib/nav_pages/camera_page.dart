@@ -1,4 +1,5 @@
 import 'package:calorie_tracker_flutter_front/nav_pages/main_page.dart';
+import 'package:calorie_tracker_flutter_front/screens/add_product_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:calorie_tracker_flutter_front/screens/barcode_scanner_screen.dart';
 import 'package:calorie_tracker_flutter_front/screens/product_info_screen.dart';
@@ -25,10 +26,10 @@ class _CameraPageState extends State<CameraPage> {
     if (!mounted || result == null) return;
 
     if (result.wasProductFound && result.product != null) {
-      // Produkt znaleziony - pokaż stronę produktu
+      // Produkt znaleziony - pokazuje stronę produktu
       _showProductScreen(result.product!);
     } else if (result.barcode != null) {
-      // Produkt nie znaleziony - pokaż dialog
+      // Produkt nie znaleziony - pokazuje dialog
       _showProductNotFound(result.barcode!);
     }
   }
@@ -38,49 +39,70 @@ class _CameraPageState extends State<CameraPage> {
       MaterialPageRoute(
         builder: (context) => ProductInfoScreen(
           product: product,
-          bottomWidget: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _startScanning();
-                    },
-                    icon: const Icon(Icons.qr_code_scanner),
-                    label: const Text('Skanuj kolejny'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFA69DF5),
-                      side: const BorderSide(color: Color(0xFFA69DF5)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Funkcja dodawania do posiłku będzie wkrótce'),
-                          backgroundColor: Color(0xFFA69DF5),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Dodaj do posiłku'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFA69DF5),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
+          bottomWidget: _buildProductActionButtons(),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _navigateToAddProduct(String barcode) async {
+    Navigator.of(context).pop(); // Zamyka dialog
+    
+    final productData = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        builder: (_) => AddProductScreen(scannedBarcode: barcode),
+      ),
+    );
+
+    // Jeśli otrzymaliśmy dane produktu - pokazuje je
+    if (productData != null) {
+      _showProductScreen(productData);
+    }
+  }
+
+  Widget _buildProductActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _startScanning();
+              },
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Skanuj kolejny'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFA69DF5),
+                side: const BorderSide(color: Color(0xFFA69DF5)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
           ),
-        ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Funkcja dodawania do posiłku będzie wkrótce'),
+                    backgroundColor: Color(0xFFA69DF5),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Dodaj do posiłku'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFA69DF5),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -128,18 +150,18 @@ class _CameraPageState extends State<CameraPage> {
             child: const Text('Skanuj inny'),
           ),
           ElevatedButton(
-            onPressed: null, // Wyłączony na razie
+            onPressed: () => _navigateToAddProduct(barcode),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
+              backgroundColor: const Color(0xFFA69DF5),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Dodaj produkt (wkrótce)'),
+            child: const Text('Dodaj produkt'),
           ),
         ],
       ),
     );
   }
-
+  
   void _handleBackNavigation() {
     if (ModalRoute.of(context)?.isFirst ?? true) {
       final mainPageState = context.findAncestorStateOfType<MainPageState>();

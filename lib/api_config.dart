@@ -3,7 +3,7 @@
 ///   flutter run --dart-define=ENV=local
 /// Domyślnie (bez parametru) ładuje się 'prod'.
 class ApiConfig {
-  // ===== adresy backendu =====
+  // adresy backendu
   static const String _prod   = 'https://ct-backend-texableplum.azurewebsites.net';
   static const String _localAndroid = 'http://10.0.2.2:5260';  // emulator Android
   static const String _localIOS     = 'http://127.0.0.1:5260'; // simulator iOS
@@ -27,7 +27,6 @@ class ApiConfig {
     }
   }
 
-  /// Buduje Uri z przekazaną ścieżką, np.:  
-  /// `ApiConfig.uri('/api/auth/login')`
+  /// Buduje Uri z przekazaną ścieżką
   static Uri uri(String path) => Uri.parse('$baseUrl$path');
 }

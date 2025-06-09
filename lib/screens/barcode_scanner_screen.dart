@@ -29,15 +29,17 @@ class ScanResult {
 ///   MaterialPageRoute(builder: (_) => BarcodeScannerScreen(searchProducts: true)),
 /// );
 class BarcodeScannerScreen extends StatefulWidget {
-  final bool searchProducts; // Czy automatycznie wyszukiwać produkty w API
+  final bool searchProducts; // Czy automatycznie wyszukiwać produkty w API?
   final String? customTitle;
   final String? customInstruction;
+  final String? autoSearchBarcode; // Automatycznie wyszukuje ten kod bez skanowania
 
   const BarcodeScannerScreen({
     super.key,
     this.searchProducts = false,
     this.customTitle,
     this.customInstruction,
+    this.autoSearchBarcode,
   });
 
   @override
@@ -51,7 +53,15 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
+    
+    // Jeśli mamy autoSearchBarcode, wyszukaj od razu
+    if (widget.autoSearchBarcode != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _handleBarcodeFound(widget.autoSearchBarcode!);
+      });
+    } else {
+      _initializeCamera();
+    }
   }
 
   void _initializeCamera() {
@@ -83,7 +93,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       _isProcessing = true;
     });
 
-    // Zatrzymuje skanowanie
+    // Zatrzymuje skanowanie (jeśli jest aktywne)
     _controller?.stop();
 
     if (widget.searchProducts) {
@@ -134,6 +144,40 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Jeśli auto-search, pokazuje loading screen
+    if (widget.autoSearchBarcode != null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                color: Color(0xFFA69DF5),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Wyszukiwanie produktu...',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.autoSearchBarcode!,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_controller == null) {
       return const Scaffold(
         body: Center(

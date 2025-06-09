@@ -42,26 +42,61 @@ class AuthInterceptor extends Interceptor {
     final path = err.requestOptions.path;
     
     if (kDebugMode) {
-      debugPrint('🔴 Error: $statusCode for ${err.requestOptions.method} $path');
+      debugPrint('🔴 AUTH_INTERCEPTOR: onError called!');
+      debugPrint('🔴 AUTH_INTERCEPTOR: Status=$statusCode, Path=$path');
+      debugPrint('🔴 AUTH_INTERCEPTOR: Response data: ${err.response?.data}');
     }
     
     // Jeśli to nie 401, przepuszcza dalej
     if (statusCode != 401) {
+      if (kDebugMode) {
+        debugPrint('🔴 AUTH_INTERCEPTOR: Not 401, passing through');
+      }
       return handler.next(err);
     }
     
     // Jeśli to endpoint autoryzacyjny, nie robi refresh (żeby uniknąć pętli)
     if (_isAuthEndpoint(path)) {
+      if (kDebugMode) {
+        debugPrint('🔴 AUTH_INTERCEPTOR: Auth endpoint, not retrying');
+      }
       return handler.next(err);
     }
     
-    // Sprawdza czy nie próbowano zbyt niedawno
+    // Sprawdza czy refresh token istnieje
+    try {
+      final refresh = await _storage.refresh;
+      if (refresh == null || refresh.isEmpty) {
+        if (kDebugMode) {
+          debugPrint('🔴 AUTH_INTERCEPTOR: No refresh token, clearing storage');
+        }
+        await _storage.clear();
+        return handler.next(err);
+      }
+    } catch (e) {
+      debugPrint('🔴 AUTH_INTERCEPTOR: Error checking refresh token: $e');
+      return handler.next(err);
+    }
+    
+    // Sprawdza czy nie próbowano zbyt niedawno (tylko jeśli poprzednia próba się udała)
     if (_lastRefreshAttempt != null && 
         DateTime.now().difference(_lastRefreshAttempt!).inSeconds < 5) {
-      if (kDebugMode) {
-        debugPrint('🔴 Refresh attempted recently, not retrying');
+      // Sprawdź czy mamy aktualny access token - jeśli tak, poprzedni refresh się udał
+      final currentAccess = await _storage.access;
+      if (currentAccess != null && currentAccess.isNotEmpty) {
+        if (kDebugMode) {
+          debugPrint('🔴 AUTH_INTERCEPTOR: Recent refresh succeeded, retrying request');
+        }
+        // Reset timer po udanym refresh
+        _lastRefreshAttempt = null;
+      } else {
+        if (kDebugMode) {
+          debugPrint('🔴 AUTH_INTERCEPTOR: Recent refresh failed, clearing storage and not retrying');
+        }
+        // Poprzedni refresh się nie udał, wyczyść storage
+        await _storage.clear();
+        return handler.next(err);
       }
-      return handler.next(err);
     }
     
     try {
@@ -70,13 +105,13 @@ class AuthInterceptor extends Interceptor {
       // 1 Jeżeli już odświeża – czeka
       if (_refreshing && _refCompleter != null) {
         if (kDebugMode) {
-          debugPrint('🟡 Waiting for ongoing refresh...');
+          debugPrint('🟡 AUTH_INTERCEPTOR: Waiting for ongoing refresh...');
         }
         refreshSuccess = await _refCompleter!.future;
       } else {
         // 2 Startuje własny refresh
         if (kDebugMode) {
-          debugPrint('🟡 Starting token refresh...');
+          debugPrint('🟡 AUTH_INTERCEPTOR: Starting token refresh...');
         }
         _refreshing = true;
         _refCompleter = Completer<bool>();
@@ -86,7 +121,7 @@ class AuthInterceptor extends Interceptor {
           refreshSuccess = await _refreshToken();
           _refCompleter!.complete(refreshSuccess);
         } catch (e) {
-          debugPrint('🔴 Exception during refresh: $e');
+          debugPrint('🔴 AUTH_INTERCEPTOR: Exception during refresh: $e');
           _refCompleter!.complete(false);
           refreshSuccess = false;
         } finally {
@@ -96,16 +131,22 @@ class AuthInterceptor extends Interceptor {
       
       if (!refreshSuccess) {
         if (kDebugMode) {
-          debugPrint('🔴 Token refresh failed');
+          debugPrint('🔴 AUTH_INTERCEPTOR: Token refresh failed, clearing storage');
         }
+        // Wyczyść storage po nieudanym refresh
+        await _storage.clear();
         return handler.next(err);
       }
+      
+      // Reset timestamp po udanym refresh
+      _lastRefreshAttempt = null;
       
       // 3️ Powtarza ORYGINALNE żądanie z nowym access-tokenem
       final newAccess = await _storage.access;
       
       if (newAccess == null || newAccess.isEmpty) {
-        debugPrint('🔴 No new access token after refresh');
+        debugPrint('🔴 AUTH_INTERCEPTOR: No new access token after refresh');
+        await _storage.clear();
         return handler.next(err);
       }
       
@@ -116,7 +157,7 @@ class AuthInterceptor extends Interceptor {
       );
       
       if (kDebugMode) {
-        debugPrint('🟢 Retrying request with new token');
+        debugPrint('🟢 AUTH_INTERCEPTOR: Retrying request with new token');
       }
       
       try {
@@ -124,7 +165,7 @@ class AuthInterceptor extends Interceptor {
         return handler.resolve(response);
       } catch (retryError) {
         if (kDebugMode) {
-          debugPrint('🔴 Retry failed: $retryError');
+          debugPrint('🔴 AUTH_INTERCEPTOR: Retry failed: $retryError');
         }
         if (retryError is DioException) {
           return handler.next(retryError);
@@ -132,14 +173,21 @@ class AuthInterceptor extends Interceptor {
         return handler.next(err);
       }
     } catch (e) {
-      debugPrint('🔴 Unexpected error in error handler: $e');
+      debugPrint('🔴 AUTH_INTERCEPTOR: Unexpected error in error handler: $e');
       return handler.next(err);
     }
   }
 
-  /// Sprawdza czy endpoint to endpoint autoryzacyjny
+  /// Sprawdza czy endpoint to endpoint autoryzacyjny (bez wymagania tokena)
   bool _isAuthEndpoint(String path) {
-    return path.contains('/api/auth/');
+    // Tylko endpointy które nie wymagają autoryzacji
+    return path.contains('/api/auth/register') ||
+           path.contains('/api/auth/login') ||
+           path.contains('/api/auth/confirm') ||
+           path.contains('/api/auth/resend-code') ||
+           path.contains('/api/auth/refresh') ||
+           path.contains('/api/auth/forgot-password') ||
+           path.contains('/api/auth/reset-password');
   }
 
   /// Odświeża tokeny
@@ -150,9 +198,13 @@ class AuthInterceptor extends Interceptor {
       
       if (currentRefresh == null || currentRefresh.isEmpty) {
         if (kDebugMode) {
-          debugPrint('🔴 No refresh token available');
+          debugPrint('🔴 AUTH_INTERCEPTOR: No refresh token available');
         }
         return false;
+      }
+
+      if (kDebugMode) {
+        debugPrint('🟡 AUTH_INTERCEPTOR: Making refresh request...');
       }
 
       // Używa OSOBNEGO Dio bez interceptorów
@@ -176,12 +228,17 @@ class AuthInterceptor extends Interceptor {
         ),
       );
 
+      if (kDebugMode) {
+        debugPrint('🟡 AUTH_INTERCEPTOR: Refresh response: ${response.statusCode}');
+        debugPrint('🟡 AUTH_INTERCEPTOR: Refresh data: ${response.data}');
+      }
+
       if (response.statusCode == 200 && response.data != null) {
         final newAccess = response.data['accessToken'] as String?;
         final newRefresh = response.data['refreshToken'] as String?;
         
         if (newAccess == null || newAccess.isEmpty) {
-          debugPrint('🔴 No access token in refresh response');
+          debugPrint('🔴 AUTH_INTERCEPTOR: No access token in refresh response');
           return false;
         }
         
@@ -191,16 +248,19 @@ class AuthInterceptor extends Interceptor {
         );
         
         if (kDebugMode) {
-          debugPrint('🟢 Tokens refreshed successfully');
+          debugPrint('🟢 AUTH_INTERCEPTOR: Tokens refreshed successfully');
         }
         return true;
       } else {
         if (kDebugMode) {
-          debugPrint('🔴 Refresh failed with status: ${response.statusCode}');
+          debugPrint('🔴 AUTH_INTERCEPTOR: Refresh failed with status: ${response.statusCode}');
         }
         
         // Jeśli refresh token jest nieważny, wyczyść storage
         if (response.statusCode == 401 || response.statusCode == 403) {
+          if (kDebugMode) {
+            debugPrint('🔴 AUTH_INTERCEPTOR: Refresh token invalid, clearing storage');
+          }
           await _storage.clear();
         }
         
@@ -208,7 +268,7 @@ class AuthInterceptor extends Interceptor {
       }
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('🔴 Exception during refresh: $e');
+        debugPrint('🔴 AUTH_INTERCEPTOR: Exception during refresh: $e');
       }
       
       // W przypadku błędu sieciowego nie czyści tokenów
