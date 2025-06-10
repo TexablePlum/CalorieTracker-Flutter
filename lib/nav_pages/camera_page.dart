@@ -54,7 +54,7 @@ class _CameraPageState extends State<CameraPage> {
       ),
     );
 
-    // Jeśli otrzymaliśmy dane produktu - pokazuje je
+    // Jeśli otrzymano dane produktu - pokazuje je
     if (productData != null) {
       _showProductScreen(productData);
     }

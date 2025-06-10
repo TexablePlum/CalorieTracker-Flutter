@@ -17,7 +17,7 @@ class ProductMappers {
     }
   }
 
-  /// Mapuje jednostki miary z polskiego na enum (dla API calls)
+  /// Mapuje jednostki miary z polskiego na enum dla wywołań API
   static String mapUnitToEnum(String polishUnit) {
     switch (polishUnit.toLowerCase()) {
       case 'g':
