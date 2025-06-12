@@ -1,3 +1,4 @@
+import 'package:calorie_tracker_flutter_front/nav_pages/measurement_page.dart';
 import 'package:calorie_tracker_flutter_front/nav_pages/profile_page.dart';
 import 'package:calorie_tracker_flutter_front/nav_pages/camera_page.dart';
 import 'package:calorie_tracker_flutter_front/nav_pages/find_page.dart';
@@ -16,11 +17,11 @@ class MainPageState extends State<MainPage> {
   int _pageIndex = 0;
   int _previousPageIndex = 0; // Przechowuje poprzednią kartę
   final List<Widget> _pages = [
-    const HomePage(), 
-    const FindPage(), 
-    const CameraPage(), 
-    const RecipePage(), 
-    ProfilePage()
+    const HomePage(),
+    MeasurementsScreen(),
+    const CameraPage(),
+    const RecipePage(),
+    ProfilePage(),
   ];
 
   /// Publiczna metoda do przełączania kart z zewnątrz
@@ -65,7 +66,7 @@ class MainPageState extends State<MainPage> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Start"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Znajdź"),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Pomiary"),
           BottomNavigationBarItem(icon: Icon(Icons.camera), label: "Skaner"),
           BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu), label: "Przepisy"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
