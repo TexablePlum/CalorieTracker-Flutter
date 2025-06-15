@@ -1,7 +1,8 @@
-/// Mappery dla enumów produktów z backendu na polskie nazwy
+import 'package:flutter/material.dart';
+
 class ProductMappers {
   
-  /// Mapuje jednostki miary z enum na polskie nazwy
+  /// Mapuje jednostki miary z enum na właściwe nazwy
   static String mapUnit(String? unit) {
     if (unit == null || unit.isEmpty) return 'Nieznana';
     
@@ -13,11 +14,11 @@ class ProductMappers {
       case 'piece':
         return 'szt.';
       default:
-        return unit; // Fallback - zwraca oryginalną wartość
+        return unit; // zwraca oryginalną wartość
     }
   }
 
-  /// Mapuje jednostki miary z polskiego na enum dla wywołań API
+  /// Mapuje jednostki miary na enum dla wywołań API
   static String mapUnitToEnum(String polishUnit) {
     switch (polishUnit.toLowerCase()) {
       case 'g':
@@ -71,11 +72,11 @@ class ProductMappers {
       case 'other':
         return 'Inne';
       default:
-        return category; // Fallback - zwraca oryginalną wartość
+        return category; // zwraca oryginalną wartość
     }
   }
 
-  /// Mapuje kategorie z polskiego na enum (dla API calls)
+  /// Mapuje kategorie na enum dla wywołań API
   static String mapCategoryToEnum(String polishCategory) {
     switch (polishCategory.toLowerCase()) {
       case 'owoce':
@@ -121,12 +122,44 @@ class ProductMappers {
     }
   }
 
-  /// Zwraca listę wszystkich dostępnych jednostek (dla dropdown'ów)
+  /// Mapuje kategorie na ikony
+  static IconData getCategoryIcon(String? category) {
+    switch (category?.toLowerCase()) {
+      case 'fruits':
+        return Icons.apple;
+      case 'vegetables':
+        return Icons.eco;
+      case 'meatandpoultry':
+        return Icons.restaurant;
+      case 'fishandseafood':
+        return Icons.set_meal;
+      case 'dairy':
+        return Icons.local_drink;
+      case 'grainsandcereals':
+        return Icons.grain;
+      case 'nutsanddriedfruits':
+        return Icons.scatter_plot;
+      case 'sweets':
+        return Icons.cake;
+      case 'beverages':
+        return Icons.local_cafe;
+      case 'oilsandfats':
+        return Icons.water_drop;
+      case 'spicesandherbs':
+        return Icons.spa;
+      case 'readymeals':
+        return Icons.dinner_dining;
+      default:
+        return Icons.inventory_2;
+    }
+  }
+
+  /// Zwraca listę wszystkich dostępnych jednostek
   static List<String> getAllUnits() {
     return ['g', 'ml', 'szt.'];
   }
 
-  /// Zwraca listę wszystkich dostępnych kategorii (dla dropdown'ów)
+  /// Zwraca listę wszystkich dostępnych kategorii
   static List<String> getAllCategories() {
     return [
       'Owoce',

@@ -62,8 +62,8 @@ class _mainProfileState extends State<ProfilePage> {
         return;
       }
       
-      // Jeśli to błąd autoryzacji, AuthInterceptor powinien był obsłużyć
-      // Jeśli nadal dostaje 401/403, znaczy że refresh się nie udał
+      // Jeśli to błąd autoryzacji to AuthInterceptor powinien był obsłużyć
+      // Jeśli nadal dostaje 401/403 to znaczy że refresh się nie udał
       if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
         debugPrint('📱 ProfilePage: Auth error, redirecting to welcome');
         await _handleForceLogout();
@@ -95,7 +95,7 @@ class _mainProfileState extends State<ProfilePage> {
 
     if (!mounted) return;
     
-    // Pokazuj komunikat o wylogowaniu
+    // Pokazuje komunikat o wylogowaniu
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Sesja wygasła. Zaloguj się ponownie.'),

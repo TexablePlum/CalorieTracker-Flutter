@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       switch (res.statusCode) {
         case 200:
-          // zapisz tokeny
+          // zapisuje tokeny
           await storage.save(res.data['accessToken'], res.data['refreshToken']);
           await checkProfileAndRedirect();
           break;

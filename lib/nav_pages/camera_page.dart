@@ -26,10 +26,10 @@ class _CameraPageState extends State<CameraPage> {
     if (!mounted || result == null) return;
 
     if (result.wasProductFound && result.product != null) {
-      // Produkt znaleziony - pokazuje stronę produktu
+      // Produkt znaleziony -> pokazuje stronę produktu
       _showProductScreen(result.product!);
     } else if (result.barcode != null) {
-      // Produkt nie znaleziony - pokazuje dialog
+      // Produkt nie znaleziony -> pokazuje dialog
       _showProductNotFound(result.barcode!);
     }
   }
@@ -54,7 +54,7 @@ class _CameraPageState extends State<CameraPage> {
       ),
     );
 
-    // Jeśli otrzymano dane produktu - pokazuje je
+    // Jeśli otrzymano dane produktu yo pokazuje je
     if (productData != null) {
       _showProductScreen(productData);
     }

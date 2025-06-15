@@ -29,7 +29,7 @@ class ScanResult {
 ///   MaterialPageRoute(builder: (_) => BarcodeScannerScreen(searchProducts: true)),
 /// );
 class BarcodeScannerScreen extends StatefulWidget {
-  final bool searchProducts; // Czy automatycznie wyszukiwać produkty w API?
+  final bool searchProducts; // Czy automatycznie wyszukiwać produkty w API
   final String? customTitle;
   final String? customInstruction;
   final String? autoSearchBarcode; // Automatycznie wyszukuje ten kod bez skanowania
@@ -54,7 +54,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   void initState() {
     super.initState();
     
-    // Jeśli mamy autoSearchBarcode, wyszukaj od razu
+    // Jeśli mam autoSearchBarcode, wyszukaj od razu
     if (widget.autoSearchBarcode != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _handleBarcodeFound(widget.autoSearchBarcode!);
@@ -128,7 +128,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
         // Produkt nie znaleziony
         Navigator.of(context).pop(ScanResult.notFound(barcode));
       } else {
-        // Błąd API - zwraca kod i parent obsłuży błąd
+        // Błąd API - zwraca kod i rodzic obsłuży błąd
         Navigator.of(context).pop(ScanResult.barcode(barcode));
       }
     } catch (e) {
@@ -144,7 +144,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Jeśli auto-search, pokazuje loading screen
+    // Jeśli auto-search to pokazuje loading screen
     if (widget.autoSearchBarcode != null) {
       return Scaffold(
         backgroundColor: Colors.black,

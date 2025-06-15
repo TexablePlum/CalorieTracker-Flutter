@@ -1,3 +1,4 @@
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:calorie_tracker_flutter_front/screens/splash_screen.dart';
 import 'package:calorie_tracker_flutter_front/services/error_handler_service.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ import 'auth/auth_interceptor.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Global error handling
+  // Globalne przechwytywanie błędów 
   FlutterError.onError = (FlutterErrorDetails details) {
     if (kDebugMode) {
       FlutterError.dumpErrorToConsole(details);
@@ -89,6 +90,16 @@ class CalorieTrackerApp extends StatelessWidget {
     return MaterialApp(
       title: 'CalorieTracker',
       debugShowCheckedModeBanner: false,
+      locale: const Locale('pl'),
+      supportedLocales: const [
+        Locale('pl'),
+        Locale('en'),
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: ThemeData(
         primarySwatch: Colors.purple,
         visualDensity: VisualDensity.adaptivePlatformDensity,

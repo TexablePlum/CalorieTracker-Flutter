@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final storage = context.read<TokenStorage>();
     final dio = context.read<Dio>();
 
-    // Krótka pauza dla efektu wizualnego
+    // Krótka pauza dla animacji
     await Future.delayed(const Duration(milliseconds: 500));
 
     try {
@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
           debugPrint('🚀 Auth failed after refresh attempt, logging out');
           await _handleLogout();
         } else {
-          // Inny błąd sieciowy - sprawdza czy mamy tokeny
+          // Inny błąd sieciowy - sprawdza czy są tokeny
           final hasTokens = await storage.isLoggedIn;
           if (hasTokens) {
             debugPrint('🚀 Network error but has tokens, navigating to MainPage');
@@ -89,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
     } catch (e) {
       debugPrint('🚀 Unexpected error: $e');
       
-      // W przypadku błędu sprawdza czy mamy tokeny
+      // W przypadku błędu sprawdza czy są tokeny
       final hasTokens = await storage.isLoggedIn;
       if (hasTokens) {
         debugPrint('🚀 Error but has tokens, navigating to MainPage');

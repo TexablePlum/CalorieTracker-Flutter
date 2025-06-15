@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../models/recipe_form.dart';
 
-/// Podstawowy serwis do obsługi API przepisów
+/// serwis do obsługi API przepisów
 class RecipeService {
   final Dio _dio;
 

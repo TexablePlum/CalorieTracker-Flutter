@@ -17,13 +17,13 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
   late RecipeService _recipeService;
   late TabController _tabController;
   
-  // Stan dla zakładki "Wyszukaj"
+  // Stan dla zakładki Wyszukaj
   List<Recipe>? _allRecipes;
   bool _isSearchLoading = false;
   String? _searchError;
   final TextEditingController _searchController = TextEditingController();
 
-  // Stan dla zakładki "Moje Przepisy"
+  // Stan dla zakładki Moje Przepisy
   List<Recipe>? _myRecipes;
   bool _isMyLoading = true;
   String? _myError;
@@ -46,7 +46,7 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  /// Wyszukuje wszystkie przepisy w zakładce "Wyszukaj"
+  /// Wyszukuje wszystkie przepisy w zakładce Wyszukaj
   Future<void> _searchAllRecipes(String searchTerm) async {
     if (searchTerm.trim().isEmpty) {
       setState(() {
@@ -85,7 +85,7 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
     }
   }
 
-  /// Ładuje przepisy użytkownika w zakładce "Moje Przepisy"
+  /// Ładuje przepisy użytkownika w zakładce Moje Przepisy
   Future<void> _loadMyRecipes() async {
     setState(() {
       _isMyLoading = true;
@@ -117,7 +117,7 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
     }
   }
 
-  /// Nawiguje do szczegółów przepisu - pobiera pełne dane
+  /// Nawiguje do szczegółów przepisu, pobiera pełne dane
   Future<void> _openRecipeDetails(Recipe recipe) async {
     if (_recipeCache.containsKey(recipe.id)) {
       Navigator.push(
@@ -280,33 +280,27 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(48),
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFFA69DF5),
-                      Color(0xFF8B7CF6),
-                      Color(0xFF7C3AED),
-                    ],
-                  ),
+              child: TabBar(
+                controller: _tabController,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white.withOpacity(0.7),
+                indicatorColor: Colors.white,
+                indicatorWeight: 3,
+                dividerColor: Colors.transparent,
+                overlayColor: WidgetStateProperty.all(Colors.transparent),
+                splashFactory: NoSplash.splashFactory,
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
                 ),
-                child: TabBar(
-                  controller: _tabController,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white.withOpacity(0.7),
-                  indicatorColor: Colors.white,
-                  indicatorWeight: 3,
-                  labelStyle: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                  tabs: const [
-                    Tab(text: 'Wyszukaj'),
-                    Tab(text: 'Moje Przepisy'),
-                  ],
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
                 ),
+                tabs: const [
+                  Tab(text: 'Wyszukaj'),
+                  Tab(text: 'Moje Przepisy'),
+                ],
               ),
             ),
           ),
@@ -360,116 +354,110 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
   }
 
   Widget _buildSearchTab() {
-    return RefreshIndicator(
-      onRefresh: () async {
-        if (_searchController.text.isNotEmpty) {
-          await _searchAllRecipes(_searchController.text);
-        }
-      },
-      color: const Color(0xFFA69DF5),
-      child: CustomScrollView(
-        slivers: [
-          // Search bar
-          SliverToBoxAdapter(
+
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        // Wyszukiwarka
+        SliverToBoxAdapter(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            color: const Color(0xFFF8F9FA),
             child: Container(
-              padding: const EdgeInsets.all(16),
-              color: const Color(0xFFF8F9FA),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Wyszukaj przepisy...',
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(Icons.clear, color: Colors.grey[500]),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() {
-                                _allRecipes = null;
-                                _searchError = null;
-                              });
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
                   ),
-                  onSubmitted: _searchAllRecipes,
-                  onChanged: (value) {
-                    if (value.isEmpty) {
-                      setState(() {
-                        _allRecipes = null;
-                        _searchError = null;
-                      });
-                    }
-                  },
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Wyszukaj przepisy...',
+                  hintStyle: TextStyle(color: Colors.grey[500]),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear, color: Colors.grey[500]),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _allRecipes = null;
+                              _searchError = null;
+                            });
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 ),
+                onSubmitted: _searchAllRecipes,
+                onChanged: (value) {
+                  if (value.isEmpty) {
+                    setState(() {
+                      _allRecipes = null;
+                      _searchError = null;
+                    });
+                  }
+                },
               ),
             ),
           ),
-          
-          // Content
-          if (_isSearchLoading)
-            const SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: Color(0xFFA69DF5)),
-                    SizedBox(height: 16),
-                    Text(
-                      'Wyszukiwanie przepisów...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+        ),
+        
+        // bez możliwości odświeżania
+        if (_isSearchLoading)
+          const SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Color(0xFFA69DF5)),
+                  SizedBox(height: 16),
+                  Text(
+                    'Wyszukiwanie przepisów...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
                     ),
-                  ],
-                ),
-              ),
-            )
-          else if (_searchError != null)
-            SliverFillRemaining(
-              child: _buildErrorWidget(_searchError!, () => _searchAllRecipes(_searchController.text)),
-            )
-          else if (_allRecipes == null)
-            SliverFillRemaining(
-              child: _buildEmptySearchState(),
-            )
-          else if (_allRecipes!.isEmpty)
-            SliverFillRemaining(
-              child: _buildNoResultsState(),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => _buildRecipeCard(_allRecipes![index]),
-                  childCount: _allRecipes!.length,
-                ),
+                  ),
+                ],
               ),
             ),
-        ],
-      ),
+          )
+        else if (_searchError != null)
+          SliverFillRemaining(
+            child: _buildErrorWidget(_searchError!, () => _searchAllRecipes(_searchController.text)),
+          )
+        else if (_allRecipes == null)
+          SliverFillRemaining(
+            child: _buildEmptySearchState(),
+          )
+        else if (_allRecipes!.isEmpty)
+          SliverFillRemaining(
+            child: _buildNoResultsState(),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _buildRecipeCard(_allRecipes![index]),
+                childCount: _allRecipes!.length,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -478,7 +466,12 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
       onRefresh: _loadMyRecipes,
       color: const Color(0xFFA69DF5),
       child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 8),
+          ),
+          
           if (_isMyLoading)
             const SliverFillRemaining(
               child: Center(
@@ -508,7 +501,7 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) => _buildRecipeCard(_myRecipes![index], showOwnerBadge: false),
@@ -520,18 +513,6 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
       ),
     );
   }
-
-  // Możemy usunąć tę metodę bo nie jest już używana
-  // Widget _buildRecipesList(List<Recipe> recipes, {bool showOwnerBadge = true}) {
-  //   return ListView.builder(
-  //     padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-  //     itemCount: recipes.length,
-  //     itemBuilder: (context, index) {
-  //       final recipe = recipes[index];
-  //       return _buildRecipeCard(recipe, showOwnerBadge: showOwnerBadge);
-  //     },
-  //   );
-  // }
 
   Widget _buildRecipeCard(Recipe recipe, {bool showOwnerBadge = true}) {
     return Container(
@@ -558,7 +539,7 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header z tytułem i badge
+                  // Header z tytułem i strzałką
                   Row(
                     children: [
                       Expanded(
@@ -608,14 +589,14 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
                         Colors.green,
                       ),
                       _buildInfoChip(
-                        Icons.restaurant_outlined,
-                        '${recipe.ingredients.length} składników',
+                        Icons.local_fire_department_outlined,
+                        '${recipe.totalCalories?.round() ?? 0} kcal',
                         Colors.orange,
                       ),
                     ],
                   ),
                   
-                  // Instrukcje preview
+                  // Instrukcje 
                   if (recipe.instructions != null && recipe.instructions!.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text(
@@ -692,7 +673,7 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 12),
           Text(
-            'Wprowadź nazwę przepisu w pole wyszukiwania\naby znaleźć to czego szukasz',
+            'Wprowadź nazwę szukanej potrawy\nlub dodaj swoją własną',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
@@ -774,37 +755,12 @@ class _RecipePageState extends State<RecipePage> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 12),
           Text(
-            'Dodaj swój pierwszy przepis\ni zacznij gotować!',
+            'Dodaj swój pierwszy przepis\nużywając przycisku na dole ekranu',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
               height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final result = await Navigator.push<Recipe>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AddRecipeScreen(),
-                ),
-              );
-              
-              if (result != null) {
-                _loadMyRecipes();
-              }
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Dodaj przepis'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFA69DF5),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
             ),
           ),
         ],

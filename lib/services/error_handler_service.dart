@@ -18,7 +18,7 @@ class ErrorHandlerService {
     // Sprawdza czy request ma flagę skipErrorHandler
     if (error.requestOptions.extra['skipErrorHandler'] == true) {
       debugPrint('ErrorHandler: Skipping error handling for ${error.requestOptions.path}');
-      return; // Nie pokazuj błędu
+      return; // Nie pokazuje błędu
     }
 
     String message;

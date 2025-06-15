@@ -1,3 +1,4 @@
+import 'package:calorie_tracker_flutter_front/mappers/product_mappers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -64,6 +65,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         productId: ingredient.productId,
         productName: ingredient.productName ?? 'Nieznany produkt',
         quantity: ingredient.quantity.toString(),
+        category: ingredient.category,
       ));
     }
   }
@@ -107,6 +109,14 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
 
   Future<void> _saveRecipe() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Dodatkowa walidacja składników
+    if (_ingredients.isEmpty) {
+      setState(() {
+        _errorMessage = 'Składniki są wymagane - dodaj przynajmniej jeden składnik';
+      });
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -204,269 +214,575 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditMode ? 'Edytuj przepis' : 'Dodaj przepis'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _saveRecipe,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    _isEditMode ? 'Zapisz' : 'Dodaj',
-                    style: const TextStyle(
-                      color: Color(0xFFA69DF5),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFA69DF5),
+            Color(0xFF8B7CF6),
+            Color(0xFF7C3AED),
+          ],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFA69DF5).withOpacity(0.3),
+            spreadRadius: 0,
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Row(
             children: [
-              // Nazwa przepisu
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nazwa przepisu *',
-                  hintText: 'np. Spaghetti Bolognese',
-                  border: OutlineInputBorder(),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Nazwa przepisu jest wymagana';
-                  }
-                  return null;
-                },
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Liczba porcji i waga
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _servingsController,
-                      decoration: const InputDecoration(
-                        labelText: 'Liczba porcji *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: (value) {
-                        final parsed = int.tryParse(value ?? '');
-                        if (parsed == null || parsed <= 0) {
-                          return 'Podaj liczbę porcji';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _weightController,
-                      decoration: const InputDecoration(
-                        labelText: 'Waga (g)',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Czas przygotowania
-              TextFormField(
-                controller: _timeController,
-                decoration: const InputDecoration(
-                  labelText: 'Czas przygotowania (minuty)',
-                  hintText: 'np. 30',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Instrukcje
-              TextFormField(
-                controller: _instructionsController,
-                decoration: const InputDecoration(
-                  labelText: 'Instrukcje przygotowania',
-                  hintText: 'Opisz krok po kroku jak przygotować przepis...',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 5,
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Składniki
-              const Text(
-                'Składniki *',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
-              const SizedBox(height: 8),
-              
-              // Lista składników
-              if (_ingredients.isNotEmpty)
-                ...List.generate(_ingredients.length, (index) {
-                  final ingredient = _ingredients[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[300]!),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            ingredient.productName,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        SizedBox(
-                          width: 80,
-                          child: TextFormField(
-                            initialValue: ingredient.quantity,
-                            decoration: const InputDecoration(
-                              suffix: Text('g'),
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-                            onChanged: (value) => _updateIngredientQuantity(index, value),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
-                          onPressed: () => _removeIngredient(index),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              
-              // Przycisk dodaj składnik
-              OutlinedButton.icon(
-                onPressed: _addIngredient,
-                icon: const Icon(Icons.add),
-                label: const Text('Dodaj składnik'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFA69DF5),
-                  side: const BorderSide(color: Color(0xFFA69DF5)),
+              Expanded(
+                child: Text(
+                  _isEditMode ? "Edytuj przepis" : "Dodaj przepis",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Komunikat o składnikach
-              if (_ingredients.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.orange[700]),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text(
-                          'Dodaj przynajmniej jeden składnik',
-                          style: TextStyle(color: Colors.orange),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              
-              const SizedBox(height: 24),
-              
-              // Błąd
-              if (_errorMessage != null)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error_outline, color: Colors.red[700]),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              
-              // Przycisk zapisz
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveRecipe,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFA69DF5),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        )
-                      : Text(
-                          _isEditMode ? 'Zaktualizuj przepis' : 'Zapisz przepis',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
-              ),
+              const SizedBox(width: 48),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, Widget child, {IconData? icon}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            spreadRadius: 0,
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFA69DF5).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: const Color(0xFFA69DF5),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    String? Function(String?)? validator,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    int maxLines = 1,
+    bool required = true,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            if (required)
+              const Text(
+                " *",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          maxLines: maxLines,
+          validator: validator,
+          decoration: InputDecoration(
+            hintText: hint,
+            filled: true,
+            fillColor: Colors.grey[50],
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFA69DF5), width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red, width: 2),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIngredientCard(int index) {
+    final ingredient = _ingredients[index];
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFFA69DF5).withOpacity(0.2),
+                  const Color(0xFF8B7CF6).withOpacity(0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFFA69DF5).withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              ProductMappers.getCategoryIcon(ingredient.category),
+              color: const Color(0xFFA69DF5),
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ingredient.productName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  ProductMappers.mapCategory(ingredient.category), // Pokazuje nazwę kategorii
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          
+          // Input dla ilości
+          Container(
+            width: 90,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Colors.grey.withOpacity(0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    initialValue: ingredient.quantity,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      isDense: true,
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+                    onChanged: (value) => _updateIngredientQuantity(index, value),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Text(
+                    'g',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(width: 12),
+          
+          // Przycisk usuwania
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.red.withOpacity(0.3),
+              ),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.red, size: 16),
+              onPressed: () => _removeIngredient(index),
+              padding: EdgeInsets.zero,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: Column(
+        children: [
+          _buildHeader(),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    
+                    // Podstawowe informacje
+                    _buildSection(
+                      'Podstawowe informacje',
+                      Column(
+                        children: [
+                          _buildTextField(
+                            controller: _nameController,
+                            label: 'Nazwa przepisu',
+                            hint: 'np. Spaghetti Bolognese',
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Nazwa przepisu jest wymagana';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: _servingsController,
+                                  label: 'Liczba porcji',
+                                  hint: '4',
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  validator: (value) {
+                                    final parsed = int.tryParse(value ?? '');
+                                    if (parsed == null || parsed <= 0) {
+                                      return 'Podaj liczbę porcji (1-50)';
+                                    }
+                                    if (parsed > 50) {
+                                      return 'Maksymalnie 50 porcji';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: _timeController,
+                                  label: 'Czas (min)',
+                                  hint: 'np. 30',
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  validator: (value) {
+                                    final parsed = int.tryParse(value ?? '');
+                                    if (parsed == null || parsed <= 0) {
+                                      return 'Podaj czas przygotowania';
+                                    }
+                                    if (parsed > 1440) {
+                                      return 'Maksymalnie 1440 min (24h)';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _weightController,
+                            label: 'Waga całkowita (g)',
+                            hint: 'np. 500',
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+                            validator: (value) {
+                              final parsed = double.tryParse(value ?? '');
+                              if (parsed == null || parsed <= 0) {
+                                return 'Podaj wagę całkowitą gotowej potrawy';
+                              }
+                              if (parsed > 50000) {
+                                return 'Maksymalnie 50000g (50kg)';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                      icon: Icons.info_outline,
+                    ),
+
+                    // Składniki
+                    _buildSection(
+                      'Składniki (${_ingredients.length})',
+                      Column(
+                        children: [
+                          if (_ingredients.isNotEmpty)
+                            ...List.generate(_ingredients.length, (index) {
+                              return _buildIngredientCard(index);
+                            }),
+                          
+                          // Przycisk dodaj składnik
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: _addIngredient,
+                              icon: const Icon(Icons.add),
+                              label: const Text('Dodaj składnik'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFA69DF5),
+                                side: const BorderSide(color: Color(0xFFA69DF5)),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          
+                          // Komunikat o składnikach
+                          if (_ingredients.isEmpty) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.info_outline, color: Colors.blue[700]),
+                                  const SizedBox(width: 12),
+                                  const Expanded(
+                                    child: Text(
+                                      'Dodaj przynajmniej jeden składnik aby utworzyć przepis',
+                                      style: TextStyle(color: Colors.blue),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      icon: Icons.restaurant,
+                    ),
+
+                    // Instrukcje przygotowania
+                    _buildSection(
+                      'Instrukcje przygotowania',
+                      _buildTextField(
+                        controller: _instructionsController,
+                        label: 'Sposób przygotowania',
+                        hint: 'Opisz krok po kroku jak przygotować potrawę...',
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 5,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Instrukcje przygotowania są wymagane';
+                          }
+                          return null;
+                        },
+                      ),
+                      icon: Icons.list_alt,
+                    ),
+
+                    // Błędy
+                    if (_errorMessage != null)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.red[700]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // Przycisk zapisz
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _saveRecipe,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFA69DF5),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          shadowColor: const Color(0xFFA69DF5).withOpacity(0.3),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                _isEditMode ? 'Zaktualizuj przepis' : 'Zapisz przepis',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32), // Przestrzeń na dole
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

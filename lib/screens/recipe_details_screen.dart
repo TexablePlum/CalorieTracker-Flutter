@@ -183,7 +183,11 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
       }
     }
   }
+
   Future<void> _deleteRecipe() async {
+    final confirmed = await _showDeleteConfirmation();
+    if (!confirmed) return;
+
     setState(() => _isActionInProgress = true);
 
     try {
@@ -236,8 +240,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
       }
     }
   }
+
   /// Pokazuje dialog potwierdzenia usunięcia
-  Future<void> _showDeleteConfirmation() async {
+  Future<bool> _showDeleteConfirmation() async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -287,9 +292,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
       ),
     );
 
-    if (result == true) {
-      await _deleteRecipe();
-    }
+    return result ?? false;
   }
 
   @override
@@ -301,31 +304,17 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         foregroundColor: Colors.black,
         elevation: 1,
         actions: [
-          // Opcje dla właściciela przepisu
+          // Przyciski dla właściciela przepisu - teraz widoczne obok siebie
           if (!_isLoadingUser && _isCurrentUserAuthor && !_isActionInProgress) ...[
             IconButton(
               onPressed: _editRecipe,
               icon: const Icon(Icons.edit_outlined),
               tooltip: 'Edytuj przepis',
             ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'delete') {
-                  _showDeleteConfirmation();
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Usuń przepis'),
-                    ],
-                  ),
-                ),
-              ],
+            IconButton(
+              onPressed: _deleteRecipe,
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              tooltip: 'Usuń przepis',
             ),
           ],
           // Loading indicator podczas akcji
@@ -415,7 +404,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     ),
                   ),
                 ),
-                // Napis "Mój przepis" jeśli user jest autorem
+                // Napis Mój przepis jeśli user jest autorem
                 if (!_isLoadingUser && _isCurrentUserAuthor)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -546,11 +535,11 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Ilość
+        // Ilość z poprawioną jednostką
         SizedBox(
           width: 80,
           child: Text(
-            ingredient.formattedQuantity,
+            _formatIngredientQuantity(ingredient, details),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Color(0xFFA69DF5),
@@ -594,6 +583,24 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
           ),
       ],
     );
+  }
+
+  /// Formatuje ilość składnika z poprawną jednostką
+  String _formatIngredientQuantity(RecipeIngredient ingredient, Map<String, dynamic>? details) {
+    final quantity = ingredient.quantity;
+    
+    // Formatuje liczbę
+    final formattedNum = quantity == quantity.roundToDouble() 
+        ? quantity.round().toString()
+        : quantity.toStringAsFixed(1);
+    
+    // Używa jednostki z detali produktu jeśli dostępne, inaczej fallback
+    String unit = 'g';
+    if (details != null && details['unit'] != null) {
+      unit = ProductMappers.mapUnit(details['unit']);
+    }
+    
+    return '$formattedNum $unit';
   }
 
   String _getIngredientNutritionInfo(RecipeIngredient ingredient, Map<String, dynamic> details) {

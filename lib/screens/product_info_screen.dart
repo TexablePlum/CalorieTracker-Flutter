@@ -81,7 +81,7 @@ class _ProductInfoScreenState extends State<ProductInfoScreen> {
         ),
       );
 
-      // Jeśli dostaliśmy zaktualizowane dane produktu odświeża ekran
+      // Jeśli otrzymano zaktualizowane dane produktu to odświeża ekran
       if (result != null && mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(

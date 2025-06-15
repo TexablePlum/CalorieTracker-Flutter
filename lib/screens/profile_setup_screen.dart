@@ -68,13 +68,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       
       debugPrint('📱 ProfileSetupScreen: Loading profile...');
       
-      // NIE używamy Options(validateStatus: (_) => true)
-      // Pozwalamy AuthInterceptor obsłużyć 401
+      // NIE używa Options(validateStatus: (_) => true)
+      // Pozwala AuthInterceptor obsłużyć 401
       final res = await dio.get('/api/profile');
       
       debugPrint('📱 ProfileSetupScreen: Profile loaded successfully');
       
-      // Jeśli dostaliśmy dane, wypełniamy formularz
+      // Jeśli otrzymano dane to wypełnia formularz
       final data = Map<String, dynamic>.from(res.data);
       setState(() {
         firstNameController.text = data["firstName"] ?? "";
@@ -93,14 +93,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     } on DioException catch (e) {
       debugPrint('📱 ProfileSetupScreen: DioException loading profile: ${e.response?.statusCode}');
       
-      // 204 oznacza brak profilu - to jest OK, zostajemy z pustym formularzem
+      // 204 oznacza brak profilu - to jest OK, zostaje pusty formularz
       if (e.response?.statusCode == 204) {
         debugPrint('📱 ProfileSetupScreen: No profile found (204), using empty form');
         return;
       }
       
       // Inne błędy - AuthInterceptor powinien był je obsłużyć
-      // Jeśli nadal mamy 401/403, znaczy że refresh się nie udał
+      // Jeśli nadal jest 401/403, znaczy że refresh się nie udał
       if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
         debugPrint('📱 ProfileSetupScreen: Auth failed, user should be redirected to login');
         // AuthInterceptor powinien był już wyczyścić tokeny i przekierować
@@ -169,12 +169,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       
       if (!mounted) return;
       
-      // Sukces - sprawdź skąd przyszliśmy
+      // Sukces - sprawdza skąd przyszliśmy
       if (Navigator.of(context).canPop()) {
-        // Jeśli można wrócić (edycja z ProfilePage), po prostu wróć
+        // Jeśli można wrócić (edycja z ProfilePage), po prostu wraca do poprzedniej strony
         Navigator.of(context).pop();
       } else {
-        // Jeśli to pierwszy setup, przejdź do ProfilePage
+        // Jeśli to pierwszy setup to przechodzi do ProfilePage
         Navigator.pushAndRemoveUntil(
           context, 
           MaterialPageRoute(builder: (_) => ProfilePage()), 
@@ -188,16 +188,16 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       if (!mounted) return;
       
       // AuthInterceptor powinien był obsłużyć 401 i odświeżyć tokeny
-      // Jeśli wciąż mamy błąd, to znaczy że coś poszło nie tak
+      // Jeśli wciąż jest błąd, to znaczy że coś poszło nie tak
       
-      // Wyświetl błąd walidacji jeśli to 400/422
+      // Wyświetla błąd walidacji jeśli to 400/422
       if (e.response?.statusCode == 400 || e.response?.statusCode == 422) {
         setState(() {
           errorMessage = _extractErrors(e.response?.data, e.response?.statusCode);
           isLoading = false;
         });
       } else {
-        // Inne błędy - pokaż ogólny komunikat
+        // Inne błędy - pokazuje ogólny komunikat
         setState(() {
           errorMessage = "Wystąpił błąd podczas zapisywania profilu. Spróbuj ponownie.";
           isLoading = false;

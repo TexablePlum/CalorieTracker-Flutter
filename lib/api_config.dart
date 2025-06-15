@@ -6,7 +6,7 @@ class ApiConfig {
   // adresy backendu
   static const String _prod   = 'https://ct-backend-texableplum.azurewebsites.net';
   static const String _localAndroid = 'http://10.0.2.2:5260';  // emulator Android
-  static const String _localIOS     = 'http://127.0.0.1:5260'; // simulator iOS
+  static const String _localIOS     = 'http://127.0.0.1:5260'; // emulator iOS
 
   /// Odczyt wartości build-time:
   static final String _env = const String.fromEnvironment(

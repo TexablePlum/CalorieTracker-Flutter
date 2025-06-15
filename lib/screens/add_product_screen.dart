@@ -59,7 +59,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     _initializeForm();
   }
 
-  /// Inicjalizuje formularz - wypełnia danymi do edycji lub kodem kreskowym
+  /// Inicjalizuje formularz i wypełnia danymi do edycji lub kodem kreskowym
   void _initializeForm() {
     if (_isEditMode) {
       // Tryb edycji - wypełnia formularz danymi produktu
@@ -172,7 +172,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (!_isEditMode && 
           e.requestOptions.path.contains('/api/Products/') && 
           e.requestOptions.method == 'GET') {
-        // Produkt został utworzony, ale nie udało się pobrać jego danych
+        // Produkt został utworzony ale nie udało się pobrać jego danych
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Produkt został dodany, ale wystąpił problem z jego wyświetleniem'),
@@ -434,7 +434,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
             keyboardType: keyboardType,
             inputFormatters: inputFormatters,
             maxLines: maxLines,
-            validator: validator,
+            validator: required && validator == null 
+                ? (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return '$label jest wymagane';
+                    }
+                    return null;
+                  }
+                : validator,
             decoration: InputDecoration(
               hintText: hint,
               filled: true,
@@ -660,7 +667,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               hint: "np. 100",
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-                              required: true, // ZMIENIONE: teraz wymagane
+                              required: true,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
                                   return "Wielkość porcji jest wymagana";
@@ -699,7 +706,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         hint: "np. 64",
                         keyboardType: TextInputType.number,
                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-                        required: false,
+                        required: true,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Kalorie są wymagane";
+                          }
+                          final parsed = double.tryParse(value.trim());
+                          if (parsed == null || parsed < 0 || parsed > 9999) {
+                            return "Wprowadź prawidłową wartość (0-9999)";
+                          }
+                          return null;
+                        },
                       ),
                       Row(
                         children: [
@@ -710,7 +727,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               hint: "np. 3.2",
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-                              required: false,
+                              required: true,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Białko jest wymagane";
+                                }
+                                final parsed = double.tryParse(value.trim());
+                                if (parsed == null || parsed < 0 || parsed > 999) {
+                                  return "Wprowadź wartość (0-999)";
+                                }
+                                return null;
+                              },
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -721,7 +748,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               hint: "np. 3.2",
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-                              required: false,
+                              required: true,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Tłuszcz jest wymagany";
+                                }
+                                final parsed = double.tryParse(value.trim());
+                                if (parsed == null || parsed < 0 || parsed > 999) {
+                                  return "Wprowadź wartość (0-999)";
+                                }
+                                return null;
+                              },
                             ),
                           ),
                         ],
@@ -735,7 +772,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               hint: "np. 4.8",
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-                              required: false,
+                              required: true,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return "Węglowodany są wymagane";
+                                }
+                                final parsed = double.tryParse(value.trim());
+                                if (parsed == null || parsed < 0 || parsed > 999) {
+                                  return "Wprowadź wartość (0-999)";
+                                }
+                                return null;
+                              },
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -778,7 +825,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       ),
                     ]),
 
-                    // Additional Information
+                    // Dodatkowe informacje
                     _buildSection("Dodatkowe informacje", [
                       _buildTextField(
                         controller: _descriptionController,
@@ -798,7 +845,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                     _buildErrorMessage(),
 
-                    // Submit Button
+                    // Przycisk potwierdzenia
                     Container(
                       width: double.infinity,
                       height: 56,

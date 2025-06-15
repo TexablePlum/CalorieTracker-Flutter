@@ -1,4 +1,4 @@
-/// Podstawowy model przepisu na podstawie API
+/// model przepisu na podstawie API
 class Recipe {
   final String id;
   final String name;
@@ -10,6 +10,7 @@ class Recipe {
   final String? createdByUserId;
   final DateTime createdAt;
   final Map<String, dynamic>? totalNutrition;
+  final double? totalCalories;
 
   Recipe({
     required this.id,
@@ -22,6 +23,7 @@ class Recipe {
     this.createdByUserId,
     required this.createdAt,
     this.totalNutrition,
+    this.totalCalories,
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
@@ -38,10 +40,11 @@ class Recipe {
       createdByUserId: json['createdByUserId'],
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       totalNutrition: json['totalNutrition'],
+      totalCalories: (json['totalCalories'] ?? 0.0).toDouble(),
     );
   }
 
-  /// Czy aktualny użytkownik jest właścicielem przepisu
+  /// sprawdza czy aktualny użytkownik jest właścicielem przepisu
   bool isOwnedBy(String? currentUserId) {
     return currentUserId != null && 
            createdByUserId != null && 
@@ -65,12 +68,14 @@ class RecipeIngredient {
   final String? productName;
   final double quantity;
   final String? unit;
+  final String? category;
 
   RecipeIngredient({
     required this.productId,
     this.productName,
     required this.quantity,
     this.unit,
+    this.category,
   });
 
   factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
@@ -79,6 +84,7 @@ class RecipeIngredient {
       productName: json['productName'],
       quantity: (json['quantity'] ?? 0.0).toDouble(),
       unit: json['unit'],
+      category: json['category'],
     );
   }
 

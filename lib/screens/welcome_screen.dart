@@ -9,11 +9,10 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       // Ustawienie koloru tła
-      backgroundColor: Colors.white, // jasna zieleń
+      backgroundColor: Colors.white,
       body: Padding(
         // Zewnętrzne odstępy po bokach
         padding: const EdgeInsets.symmetric(horizontal: 32),
-        // Column
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

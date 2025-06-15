@@ -43,11 +43,13 @@ class RecipeIngredientForm {
   String productId;
   String productName;
   String quantity;
+  String? category;
 
   RecipeIngredientForm({
     this.productId = '',
     this.productName = '',
     this.quantity = '',
+    this.category,
   });
 
   bool get isValid {
